@@ -95,9 +95,8 @@ class ProfanityFilter:
         profane_words.extend([inflection.pluralize(word) for word in profane_words])
         profane_words = list(set(profane_words))
 
-        # We sort the list based on decreasing word length
-        profane_words.sort(key=len)
-        profane_words.reverse()
+        # We sort the list based on decreasing word length, leaving regex patterns sorted by length at the end
+        profane_words.sort(key=lambda x: (is_regex_pattern(x), -len(x)))
 
         return profane_words
 
@@ -115,7 +114,7 @@ class ProfanityFilter:
         for word in bad_words:
             # Apply word boundaries to the bad word
             regex_string = r'{0}' if self._no_word_boundaries else r'\b{0}\b'
-            regex_string = regex_string.format(word)  
+            regex_string = regex_string.format(word)
             regex = re.compile(regex_string, re.IGNORECASE)
             res = regex.sub(self._censor_char * (self._censor_length if self._censor_length > -1 else len(word)), res)
 
@@ -130,3 +129,11 @@ class ProfanityFilter:
     def is_profane(self, input_text):
         """Returns True if input_text contains any profane words, False otherwise."""
         return self.has_bad_word(input_text)
+
+def is_regex_pattern(s):
+    # Regex to catch common regex elements including:
+    # - Escape sequences like \d, \w, \b, \S, etc.
+    # - Quantifiers like *, +, ?, {n}, etc.
+    # - Grouping, alternation, character classes, etc.
+    regex_pattern = re.compile(r'\\[dDwWsSbB]|\*|\+|\?|\{|\}|\[|\]|\(|\)|\.|\^|\$|\\\|')
+    return bool(regex_pattern.search(s))
