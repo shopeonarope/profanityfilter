@@ -17,6 +17,10 @@ class ProfanityFilter:
             - no_word_boundaries (bool): 
                 False means no word boundaries will be used in the regex for bad words. 
                 i.e abc\ **badword**\ abc will be treated as profane.
+            - censor_char (str):
+                single charater to use for censored word. Default: '_'
+            - censor_length (int):
+                length to make censored replacement. Default '-1' use original word length
         """
 
         # If defined, use this instead of _censor_list
@@ -34,7 +38,7 @@ class ProfanityFilter:
         # What to censor the words with
         self._censor_char = kwargs.get("censor_char", '_')
 
-        self._censor_length = 4
+        self._censor_length = kwargs.get("censor_length", -1)
 
         # Where to find the censored words
         self._BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -113,7 +117,7 @@ class ProfanityFilter:
             regex_string = r'{0}' if self._no_word_boundaries else r'\b{0}\b'
             regex_string = regex_string.format(word)  
             regex = re.compile(regex_string, re.IGNORECASE)
-            res = regex.sub(self._censor_char * self._censor_length, res)
+            res = regex.sub(self._censor_char * (self._censor_length if self._censor_length > -1 else len(word)), res)
 
         return res
 
