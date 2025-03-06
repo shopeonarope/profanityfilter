@@ -32,7 +32,7 @@ class ProfanityFilter:
         self._censor_list = []
 
         # What to censor the words with
-        self._censor_char = "_"
+        self._censor_char = kwargs.get("censor_char", '_')
 
         self._censor_length = 4
 
