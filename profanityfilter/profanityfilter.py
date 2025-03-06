@@ -32,7 +32,9 @@ class ProfanityFilter:
         self._censor_list = []
 
         # What to censor the words with
-        self._censor_char = "*"
+        self._censor_char = "_"
+
+        self._censor_length = 4
 
         # Where to find the censored words
         self._BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -88,9 +90,8 @@ class ProfanityFilter:
         profane_words.extend(self._extra_censor_list)
         profane_words.extend([inflection.pluralize(word) for word in profane_words])
         profane_words = list(set(profane_words))
-        
-        # We sort the list based on decreasing word length so that words like
-        # 'fu' aren't substituted before 'fuck' if no_word_boundaries = true
+
+        # We sort the list based on decreasing word length
         profane_words.sort(key=len)
         profane_words.reverse()
 
@@ -112,7 +113,7 @@ class ProfanityFilter:
             regex_string = r'{0}' if self._no_word_boundaries else r'\b{0}\b'
             regex_string = regex_string.format(word)  
             regex = re.compile(regex_string, re.IGNORECASE)
-            res = regex.sub(self._censor_char * len(word), res)
+            res = regex.sub(self._censor_char * self._censor_length, res)
 
         return res
 
