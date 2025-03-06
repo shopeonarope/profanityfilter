@@ -116,7 +116,8 @@ class ProfanityFilter:
             regex_string = r'{0}' if self._no_word_boundaries else r'\b{0}\b'
             regex_string = regex_string.format(word)
             regex = re.compile(regex_string, re.IGNORECASE)
-            res = regex.sub(self._censor_char * (self._censor_length if self._censor_length > -1 else len(word)), res)
+            replacement_string = self._censor_char * self._censor_length if self._censor_length > -1 else replace_with_underscores
+            res = regex.sub(replacement_string, res)
 
         return res
 
@@ -129,6 +130,9 @@ class ProfanityFilter:
     def is_profane(self, input_text):
         """Returns True if input_text contains any profane words, False otherwise."""
         return self.has_bad_word(input_text)
+
+def replace_with_underscores(match):
+    return ''.join('_' if char != ' ' else ' ' for char in match.group(0))
 
 def is_regex_pattern(s):
     # Regex to catch common regex elements including:
